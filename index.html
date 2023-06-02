@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    
+    <title>Doubly Linked List Visualization</title>
+    <style>
+        .node {
+
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            border: 1px solid black;
+            text-align: center;
+            vertical-align: middle;
+           margin: 5px;
+        }
+
+        .arrow {
+            display: inline-block;
+        }
+
+        .flex-column{
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .flex-row{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            flex-wrap: wrap;
+            /* text-align: center; */
+        }
+
+        .title{
+            display: flex;
+            justify-content: center;
+            font-size: 200%;
+        }
+
+        .main-container{
+            display: flex;
+            height:max-content;
+            width: 85%;
+            margin: 0 auto;
+            margin-top: 3%;
+            border: 3px solid black
+            /* justify-content: center; */
+            /* background-color: red; */
+        }
+
+        .options-container{
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            margin-top: 3%;
+            gap: 2%
+        }
+
+        .hidden{
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div class="title">Visualization of Double Linked List</div>
+
+    <div class="main-container">
+        <div id="list" class="flex-row"></div>
+    </div>
+
+    <div class="options-container">
+        <select name="" id="select">
+            <option value="" selected></option>
+            <option value="tail">Insert Tail</option>
+            <option value="head">Insert Head</option>
+            <option value="add">Add at Position</option>
+            <option value="dtail">Delete Tail</option>
+            <option value="dhead">Delete Head</option>
+            <option value="delete">Delete Position</option>
+            <option value="size">Display Size</option>
+            <option value="reset">Reset</option>
+        </select>
+
+        <div class="hidden" id="number-input">
+        <label for="add">Number:</label>
+        <input type="number" name="add" id="number" >
+        </div>
+
+        <div class="hidden" id="position-input">
+            <label for="add" >At Position:</label>
+            <input type="number" name="add" id="position">
+        </div>
+
+        <button class="hidden" id="submit">Submit</button>
+        <div id="sizeContainer" class="hidden">Test</div>
+    </div>
+    
+    <script>
+
+
+    const selection = document.getElementById("select");
+    const number_container = document.getElementById("number-input");
+    const position_container = document.getElementById("position-input");
+    const number = document.getElementById("number");
+    const position = document.getElementById("position");
+    const submitButton = document.getElementById("submit");
+    const sizeContainer = document.getElementById("sizeContainer");
+    let selectedValue = null;
+
+    // console.log(sizeContainer);
+        // Define the Node class
+        class Node {
+            constructor(data) {
+                this.data = data;
+                this.previous = null;
+                this.next = null;
+            }
+        }
+
+        // Define the DoublyLinkedList class
+        class DoublyLinkedList {
+            constructor() {
+                this.head = null;
+                this.tail = null;
+            }
+
+            // Add a new node to the end of the list
+            addToEnd(data) {
+                const newNode = new Node(data);
+
+                if (!this.head) {
+                    this.head = newNode;
+                    this.tail = newNode;
+                } else {
+                    newNode.previous = this.tail;
+                    this.tail.next = newNode;
+                    this.tail = newNode;
+                }
+            }
+
+            addToStart(data){
+                const newNode = new Node(data);
+
+                if (!this.head){
+                    this.head = newNode;
+                    this.tail = newNode;
+                    return;
+                }
+                newNode.next = this.head;
+                this.head.previous = newNode;
+                this.head = newNode;
+            }
+
+
+            addToN(data, pos){
+                if (pos <= 0 || pos > this.size() + 1){
+                    position.style.border = "1px solid red";
+                    return;
+                }
+
+                const newNode = new Node(data);
+
+                if (pos == 1) {
+                    this.addToStart(data);
+                    position.style.border = "";
+                    return;
+                }
+
+                if (pos == this.size() + 1) {
+                    this.addToEnd(data);
+                    position.style.border = "";
+                    return;
+                }
+                
+                let current = this.head;
+                
+                for (let i=1; i<pos-1; i++){
+                    current = current.next;
+                }
+
+                newNode.next = current.next;
+                current.next.previous = newNode;
+                current.next = newNode;
+                newNode.prev = current;
+                position.style.border = "";
+            }
+
+
+            size(){
+                let current = this.head;
+                let size = 0;
+
+                while (current){
+                    size++;
+                    current = current.next;
+                }
+
+                return size;
+            }
+
+            deleteHead(){
+                if (this.head == this.tail){
+                    this.head = null;
+                    this.tail = null;
+                    return;
+                }
+
+                this.head = this.head.next;
+                this.head.previous = null;
+            }
+
+            deleteTail(){
+                if (this.head == this.tail) {
+                    this.head = null;
+                    this.tail = null;
+                    return;
+                }
+
+                this.tail = this.tail.previous;
+                this.tail.next = null;
+            }
+
+            deleteAtPos(pos){
+
+                if (pos <= 0 || pos > this.size()){
+                    position.style.border = "1px solid red";
+                    return;
+                }
+
+                if (pos == 1){
+                    this.deleteHead();
+                    position.style.border = "";
+                    return;
+                }
+
+                if (pos == this.size()){
+                    this.deleteTail();
+                    position.style.border = "";
+                    return;
+                }
+
+                let current = this.head;
+
+                for (let i=1;i<pos;i++){
+                    current = current.next;
+                }
+
+                current.previous.next = current.next;
+                current.next.previous = current.previous;
+                position.style.border = "";
+            }
+
+
+
+
+            reset(elementId){
+                const listElement = document.getElementById(elementId);
+                 while (listElement.firstChild) {
+                    listElement.firstChild.remove();
+                }
+            }
+
+            // Render the list in the HTML element
+            render(elementId) {
+
+                this.reset(elementId);
+
+                const listElement = document.getElementById(elementId);
+                let current = this.head;
+
+                while (current) {
+                    const nodeElement = document.createElement('div');
+                    nodeElement.classList.add('node');
+                    nodeElement.textContent = current.data;
+                    listElement.appendChild(nodeElement);
+
+                    if (current.next) {
+                        const forwardBackwardsArrow = document.createElement('div');
+                        forwardBackwardsArrow.classList.add("flex-column");
+
+                        const forwardArrowElement = document.createElement('span');
+                        forwardArrowElement.classList.add('arrow');
+                        forwardArrowElement.textContent = '→';
+
+                        const backwardArrowElement = document.createElement('span');
+                        backwardArrowElement.classList.add('arrow');
+                        backwardArrowElement.textContent = '←';
+
+                        forwardBackwardsArrow.appendChild(forwardArrowElement);
+                        forwardBackwardsArrow.appendChild(backwardArrowElement);
+                        listElement.appendChild(forwardBackwardsArrow);
+
+                    }
+
+                    current = current.next;
+                }
+            }
+        }
+
+        const list = new DoublyLinkedList();
+
+
+        function resetValues(){
+            number.value = "";
+            position.value = "";
+        }
+
+
+        selection.addEventListener('change', (event) => {
+                selectedValue = event.target.value;
+
+                if (selectedValue === ""){
+                    number_container.classList.add("hidden");
+                    submitButton.classList.add("hidden");
+                    position_container.classList.add("hidden");
+                    sizeContainer.classList.add("hidden");
+                    resetValues();
+                    return;
+                }
+                 if(selectedValue === "tail" || selectedValue === "head"){
+                   number_container.classList.remove("hidden");
+                   submitButton.classList.remove("hidden");
+                   position_container.classList.add("hidden");
+                   sizeContainer.classList.add("hidden");
+                    resetValues();
+                     return;
+                 }
+
+                 if(selectedValue === "add"){
+                    number_container.classList.remove("hidden");
+                    position_container.classList.remove("hidden");
+                    submitButton.classList.remove("hidden");
+                    sizeContainer.classList.add("hidden");
+                     resetValues();
+                     return;
+                 }
+
+                 if (selectedValue === "dtail" || selectedValue === "dhead" || selectedValue === "reset"){
+                    number_container.classList.add("hidden");
+                    position_container.classList.add("hidden");
+                    submitButton.classList.remove("hidden");
+                    sizeContainer.classList.add("hidden");
+                     resetValues();
+                     return;
+                 }
+
+                 if (selectedValue === "delete"){
+                    number_container.classList.add("hidden");
+                    position_container.classList.remove("hidden");
+                    submitButton.classList.remove("hidden");
+                    sizeContainer.classList.add("hidden");
+                     resetValues();
+                    return;
+                 }
+
+                 if (selectedValue === "size"){
+                    number_container.classList.add("hidden");
+                    position_container.classList.add("hidden");
+                    submitButton.classList.add("hidden");
+                    sizeContainer.classList.remove("hidden");
+                    sizeContainer.innerHTML = list.size();
+                    resetValues();
+                    return;
+                 }
+            });
+
+        submitButton.addEventListener("click", () => {
+            let numberValue = number.value;
+            let positionValue = position.value;
+            
+            if (selectedValue === "tail" && !isNaN(numberValue) && numberValue !== ""){
+                list.addToEnd(numberValue);
+                list.render('list');         
+            }
+
+            else if (selectedValue === "reset") {
+                list.reset('list');
+            }
+
+            else if (selectedValue === "head" && !isNaN(numberValue) && numberValue !== ""){
+                list.addToStart(numberValue);
+                list.render('list');
+            }
+
+            else if (selectedValue === "add"  && !isNaN(numberValue) && numberValue !== ""  && !isNaN(positionValue) && positionValue !== "" ){
+                list.addToN(numberValue, positionValue);
+                list.render('list')
+            }
+
+            else if (selectedValue === "dhead"){
+                list.deleteHead();
+                list.render('list');
+            }
+
+            else if (selectedValue === "dtail"){
+                list.deleteTail();
+                list.render('list');
+            }
+
+            else if (selectedValue === "delete" && !isNaN(positionValue) && positionValue !== ""){
+                list.deleteAtPos(positionValue);
+                list.render('list');
+            }
+        })
+
+    </script>
+
+</body>
+
+</html>
